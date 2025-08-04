@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -73,10 +73,7 @@ export function ChecklistView({ checklistId, checklistTitle, onBack }: Checklist
   ]);
 
   const [newItemContent, setNewItemContent] = useState("");
-  const [newItemDescription, setNewItemDescription] = useState("");
-  const [newItemRepeatable, setNewItemRepeatable] = useState(false);
   const [editingItem, setEditingItem] = useState<ChecklistItem | null>(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
@@ -96,9 +93,8 @@ export function ChecklistView({ checklistId, checklistTitle, onBack }: Checklist
     const newItem: ChecklistItem = {
       id: Date.now().toString(),
       content: newItemContent.trim(),
-      description: newItemDescription.trim() || undefined,
       isCompleted: false,
-      isRepeatable: newItemRepeatable,
+      isRepeatable: false,
       section: "open",
       sortOrder: items.length + 1,
       createdAt: new Date().toISOString()
@@ -106,14 +102,17 @@ export function ChecklistView({ checklistId, checklistTitle, onBack }: Checklist
 
     setItems([...items, newItem]);
     setNewItemContent("");
-    setNewItemDescription("");
-    setNewItemRepeatable(false);
-    setIsAddDialogOpen(false);
     
     toast({
       title: "Item added",
       description: "New checklist item has been added successfully."
     });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAddItem();
+    }
   };
 
   const handleEditItem = () => {
@@ -217,54 +216,6 @@ export function ChecklistView({ checklistId, checklistTitle, onBack }: Checklist
                 <Check className="h-4 w-4 mr-2" />
                 Complete All
               </Button>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Item
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add New Item</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="content">Content</Label>
-                      <Input
-                        id="content"
-                        value={newItemContent}
-                        onChange={(e) => setNewItemContent(e.target.value)}
-                        placeholder="Enter item content..."
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">Description (optional)</Label>
-                      <Textarea
-                        id="description"
-                        value={newItemDescription}
-                        onChange={(e) => setNewItemDescription(e.target.value)}
-                        placeholder="Add a description..."
-                        rows={3}
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="repeatable"
-                        checked={newItemRepeatable}
-                        onCheckedChange={(checked) => setNewItemRepeatable(checked as boolean)}
-                      />
-                      <Label htmlFor="repeatable">Make this item repeatable</Label>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={handleAddItem}>Add Item</Button>
-                      <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
           </div>
         </div>
@@ -350,6 +301,27 @@ export function ChecklistView({ checklistId, checklistTitle, onBack }: Checklist
                 ))
               )}
             </div>
+            
+            {/* Inline Add Item */}
+            <Card className="mt-4">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                  <Input
+                    value={newItemContent}
+                    onChange={(e) => setNewItemContent(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Add a new item..."
+                    className="border-none shadow-none focus-visible:ring-0 text-base"
+                  />
+                  {newItemContent.trim() && (
+                    <Button size="sm" onClick={handleAddItem}>
+                      Add
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
