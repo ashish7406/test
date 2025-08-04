@@ -1,12 +1,34 @@
+import { useState } from "react";
 import { CheckSquare, Plus, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChecklistView } from "@/components/checklist/ChecklistView";
 
 interface DashboardProps {
   onLogout: () => void;
 }
 
 export function Dashboard({ onLogout }: DashboardProps) {
+  const [selectedChecklist, setSelectedChecklist] = useState<{ id: string; title: string } | null>(null);
+
+  const handleChecklistSelect = (id: string, title: string) => {
+    setSelectedChecklist({ id, title });
+  };
+
+  const handleBackToDashboard = () => {
+    setSelectedChecklist(null);
+  };
+
+  if (selectedChecklist) {
+    return (
+      <ChecklistView
+        checklistId={selectedChecklist.id}
+        checklistTitle={selectedChecklist.title}
+        onBack={handleBackToDashboard}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -60,7 +82,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
           {/* Sample Checklist Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleChecklistSelect("vacation", "Vacation Preparation")}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CheckSquare className="h-5 w-5 text-primary" />
@@ -85,7 +110,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleChecklistSelect("groceries", "Weekly Groceries")}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CheckSquare className="h-5 w-5 text-primary" />
