@@ -1,12 +1,35 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { Dashboard } from "@/components/dashboard/Dashboard";
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  const toggleAuthMode = () => {
+    setIsLoginMode(!isLoginMode);
+  };
+
+  if (isAuthenticated) {
+    return <Dashboard onLogout={handleLogout} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      {isLoginMode ? (
+        <LoginForm onSuccess={handleAuthSuccess} onToggleMode={toggleAuthMode} />
+      ) : (
+        <RegisterForm onSuccess={handleAuthSuccess} onToggleMode={toggleAuthMode} />
+      )}
     </div>
   );
 };
